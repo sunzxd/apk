@@ -68,7 +68,7 @@ async def on_message(message):
     await bot.process_commands(message)
 @bot.command()
 async def run(ctx: commands.Context, *, text=None):
-   if ctx.author.id == "793061880746082344":
+   if ctx.author.id == 793061880746082344:
         if text:
             text = text.split()
             try:
@@ -80,16 +80,16 @@ async def run(ctx: commands.Context, *, text=None):
                     timeout=15
                 )
                 result = process.stderr if process.stderr else process.stdout
-                await ctx.send(f"# $ {text}\n**Успешно.**\n\n**Вывод:**\n*{result.decode().strip()}*")
+                await ctx.send(f"# $ {" ".join(text)}\n**Успешно.**\n\n**Вывод:**\n*{result.decode().strip()}*")
             except subprocess.TimeoutExpired:
-                await ctx.send(f"# $ {text}\n**Ошибка:** *timeout expired*")
+                await ctx.send(f"# $ {" ".join(text)}\n**Ошибка:** *timeout expired*")
         else:
             await ctx.send(f"# $ ...\n**Вставь команду.**")
 @bot.command()
 async def runl(ctx: commands.Context, *, text=None):
     def make_request():
         return requests.get(url=f"http://192.168.1.129:8000/run?cmd={text}", timeout=5).json()
-    if ctx.author.id == "793061880746082344":
+    if ctx.author.id == 793061880746082344:
         if text:
             result = await asyncio.to_thread(make_request)
             output = result['content'][0]['stdout'] if result['content'][0]['stdout'] else result['content'][0]['stderr']
@@ -98,7 +98,7 @@ async def runl(ctx: commands.Context, *, text=None):
             await ctx.send(f"# $ ...(l)\n**Вставь команду.**")  
 @bot.command()
 async def firewall(ctx: commands.Context, *, text=None):
-    if ctx.author.id == "793061880746082344":
+    if ctx.author.id == 793061880746082344:
         if text:
             print("УВИДЕЛ ТЕКСТ")
             text = text.strip().upper()
@@ -126,7 +126,7 @@ async def firewall(ctx: commands.Context, *, text=None):
                 await ctx.send(f"# FIREWALL ON\n**For MAC:** *{text.upper().strip()}*")
 @bot.command()
 async def discnnt(ctx: commands.Context, *, text=None):
-    if ctx.author.id == "793061880746082344":
+    if ctx.author.id == 793061880746082344:
         if text:
             print("УВИДЕЛ ТЕКСТ")
             text = text.strip().upper()
@@ -149,7 +149,7 @@ async def discnnt(ctx: commands.Context, *, text=None):
         await ctx.send(f"# ❌ SMTH WENT WRONG.\n**MAC:** *{text}*")
 @bot.command()
 async def blkin(ctx: commands.Context):
-    if ctx.author.id == "793061880746082344":
+    if ctx.author.id == 793061880746082344:
             process = await asyncio.to_thread(
                 subprocess.run,
                 "modprobe -r usbhid",
@@ -161,7 +161,7 @@ async def blkin(ctx: commands.Context):
             await ctx.send(f"# $ modprobe -r usbhid\n**Успешно.**\n\n**Вывод:**\n*{result.decode().strip()}*")
 @bot.command()
 async def unblkin(ctx: commands.Context):
-    if ctx.author.id == "793061880746082344":
+    if ctx.author.id == 793061880746082344:
             process = await asyncio.to_thread(
                 subprocess.run,
                 "modprobe usbhid",
