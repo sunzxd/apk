@@ -1,11 +1,10 @@
 import discord
 from dotenv import load_dotenv
 from os import getenv
-from router import check_for, mkfrwl, turn_firewall, dscd
+from router import check_for, turn_firewall, dscd
 import requests
 import subprocess
 from req import event, monitor
-import threading
 import asyncio
 import re
 load_dotenv()
@@ -22,7 +21,7 @@ async def loop():
             data["FIREWALL"] = "Есть"
         else:
             data["FIREWALL"] = "Нету"
-        if data["NAME"] == None:
+        if data["NAME"] is None:
             await me.send(f"# Подключено устройство.\n\n**IP:** *{data["IP"]}*\n**MAC:** *{data["MAC"]}*\n**FIREWALL:** *{data['FIREWALL']}*")
         else:
             await me.send(f"# Подключено устройство.\n\n**IP:** *{data["IP"]}*\n**MAC:** *{data["MAC"]}*\n**NAME:** *{data['NAME']}*\n**FIREWALL:** *{data['FIREWALL']}*")
@@ -46,7 +45,7 @@ async def check_active():
             await me.send("Ноутбук запущен.")
     if laptop_active:
             try:
-                request = await asyncio.to_thread(
+                await asyncio.to_thread(
                     requests.get,
                     "http://192.168.1.129:8000/is_active",
                     timeout=5
@@ -70,19 +69,21 @@ async def on_message(message):
 async def run(ctx: commands.Context, *, text=None):
    if ctx.author.id == 793061880746082344:
         if text:
-            text = text.split()
+            command = text.split()
+            print(command)
             try:
                 process = await asyncio.to_thread(
                     subprocess.run,
-                    text,
+                    command,
                     capture_output=True,
                     shell=False,
+                    text=True,
                     timeout=15
                 )
                 result = process.stderr if process.stderr else process.stdout
-                await ctx.send(f"# $ {" ".join(text)}\n**Успешно.**\n\n**Вывод:**\n*{result.decode().strip()}*")
+                await ctx.send(f"# $ {" ".join(command)}\n**Успешно.**\n\n**Вывод:**\n*{result.strip()}*")
             except subprocess.TimeoutExpired:
-                await ctx.send(f"# $ {" ".join(text)}\n**Ошибка:** *timeout expired*")
+                await ctx.send(f"# $ {" ".join(command)}\n**Ошибка:** *timeout expired*")
         else:
             await ctx.send(f"# $ ...\n**Вставь команду.**")
 @bot.command()
@@ -99,15 +100,15 @@ async def runl(ctx: commands.Context, *, text=None):
 @bot.command()
 async def firewall(ctx: commands.Context, *, text=None):
     if ctx.author.id == 793061880746082344:
+        mac = None
         if text:
-            print("УВИДЕЛ ТЕКСТ")
             text = text.strip().upper()
-            print("ОТПРАВИЛ ДВА ЗАПРОСА")  
         elif ctx.message.reference:
-            replied_message = await ctx.fetch_message(
-                ctx.message.reference.message_id
-            )
-            mac = re.search(r'[0-9a-f]{2}(:[0-9a-f]{2}){5}', replied_message.content.lower())
+            if ctx.message.reference.message_id is not None:
+                replied_message = await ctx.fetch_message(
+                    ctx.message.reference.message_id
+                )
+                mac = re.search(r'[0-9a-f]{2}(:[0-9a-f]{2}){5}', replied_message.content.lower())
             if mac:
                 text = mac.group(0).strip().upper()
             else:
@@ -127,15 +128,17 @@ async def firewall(ctx: commands.Context, *, text=None):
 @bot.command()
 async def discnnt(ctx: commands.Context, *, text=None):
     if ctx.author.id == 793061880746082344:
+        mac = None
         if text:
             print("УВИДЕЛ ТЕКСТ")
             text = text.strip().upper()
             print("ОТПРАВИЛ ДВА ЗАПРОСА")  
         elif ctx.message.reference:
-            replied_message = await ctx.fetch_message(
-                ctx.message.reference.message_id
-            )
-            mac = re.search(r'[0-9a-f]{2}(:[0-9a-f]{2}){5}', replied_message.content.lower())
+            if ctx.message.reference.message_id is not None:
+                replied_message = await ctx.fetch_message(
+                    ctx.message.reference.message_id
+                )
+                mac = re.search(r'[0-9a-f]{2}(:[0-9a-f]{2}){5}', replied_message.content.lower())
             if mac:
                 text = mac.group(0).strip().upper()
             else:
@@ -152,23 +155,28 @@ async def blkin(ctx: commands.Context):
     if ctx.author.id == 793061880746082344:
             process = await asyncio.to_thread(
                 subprocess.run,
-                "modprobe -r usbhid",
+                ['modprobe', '-r', 'usbhid'],
                 capture_output=True,
-                shell=True,
+                shell=False,
+                text=True,
                 timeout=15
             )
             result = process.stderr if process.stderr else process.stdout
-            await ctx.send(f"# $ modprobe -r usbhid\n**Успешно.**\n\n**Вывод:**\n*{result.decode().strip()}*")
+            await ctx.send(f"# $ modprobe -r usbhid\n**Успешно.**\n\n**Вывод:**\n*{result.strip()}*")
 @bot.command()
 async def unblkin(ctx: commands.Context):
     if ctx.author.id == 793061880746082344:
             process = await asyncio.to_thread(
                 subprocess.run,
-                "modprobe usbhid",
+                ["modprobe", "usbhid"],
                 capture_output=True,
-                shell=True,
+                shell=False,
+                text=True,
                 timeout=15
             )
             result = process.stderr if process.stderr else process.stdout
-            await ctx.send(f"# $ modprobe usbhid\n**Успешно.**\n\n**Вывод:**\n*{result.decode().strip()}*")
-bot.run(token)
+            await ctx.send(f"# $ modprobe usbhid\n**Успешно.**\n\n**Вывод:**\n*{result.strip()}*")
+if token is not None:
+    bot.run(token)
+else:
+    print("TOKEN BAD!")
