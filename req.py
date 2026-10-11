@@ -3,7 +3,7 @@ import asyncio
 
 event = asyncio.Queue()
 port = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-port.bind(('192.168.1.235', 20514))
+port.bind(('10.0.0.51', 20514))
 def receive_packet():
     return port.recv(4096)
 async def monitor():

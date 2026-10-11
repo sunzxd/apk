@@ -2,8 +2,6 @@ from dotenv import load_dotenv
 from os import getenv
 import json
 import requests
-import asyncio
-import os
 def turn_firewall(mac):
     responce = session.get(url='http://192.168.1.1/cgi-bin/luci/admin/web/firewall/trafficrules/formdata')
     responce = responce.json()
@@ -62,4 +60,3 @@ form = {
         }
 session = requests.Session()
 login = session.post(url="http://192.168.1.1/cgi-bin/luci", data=form, allow_redirects=False)
-step = 0
